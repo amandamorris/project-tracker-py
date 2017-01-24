@@ -54,18 +54,47 @@ def make_new_student(first_name, last_name, github):
 
 def get_project_by_title(title):
     """Given a project title, print information about the project."""
-    pass
+    QUERY = """
+        SELECT *
+        FROM projects
+        WHERE title = :title
+        """
+    db_cursor = db.session.execute(QUERY, {'title': title})
+    row = db_cursor.fetchone()
+    print "Project: %s \nDescription: %s \nMaximum grade: %s" % (row[1], row[2], row[3])
+
 
 
 def get_grade_by_github_title(github, title):
     """Print grade student received for a project."""
-    pass
+    QUERY = """
+        SELECT *
+        FROM grades
+        WHERE project_title = :title AND student_github =:github
+        """
+    db_cursor = db.session.execute(QUERY, {'title': title,
+                                           'github': github})
+    row = db_cursor.fetchone()
+    print "Student Username: %s \nProject Title: %s \nGrade: %s" % (row[1],
+                                                                    row[2],
+                                                                    row[3])
+
+
 
 
 def assign_grade(github, title, grade):
     """Assign a student a grade on an assignment and print a confirmation."""
-    pass
+    QUERY = """
+            INSERT INTO grades (student_github, project_title, grade)
+            VALUES (:github, :title, :grade)
+            """
 
+    db.session.execute(QUERY, {'title': title,
+                               'grade': grade,
+                               'github': github})
+    db.session.commit()
+
+    print "Successfully added student username: %s \nProject title: %s \nGrade: %s" % (github, title, grade)              
 
 def handle_input():
     """Main loop.
@@ -97,6 +126,6 @@ if __name__ == "__main__":
     app = Flask(__name__)
     connect_to_db(app)
 
-    handle_input()
+    # handle_input()
 
     db.session.close()
